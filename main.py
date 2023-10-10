@@ -1,24 +1,20 @@
 from datetime import date as dt
 import calc_easter_day
 import fixed_holidays
-import dinamic_holidays
+import dynamic_holidays
 from fastapi import FastAPI
 
 app = FastAPI()
 
 
-@app.get("/")
-async def root():
-    return {"message": "Hello World"}
-
-
-@app.get("/isholiday/{date}")
+@app.get("/is_holiday/{date}")
 async def isholiday(date: dt):
     try:
-        if fixed_holidays.is_holiday(date) or dinamic_holidays.is_holiday(date):
-            return {"message": f"The date {date} is holiday"}
-        else:
-            return {"message": f"The date {date} is not holiday"}
+        if fixed_holidays.is_holiday(date) or dynamic_holidays.is_holiday(date):
+            return True
+
+        return False
+
     except ValueError:
         return {"message": f"The date {date} is not valid"}
 
@@ -26,29 +22,29 @@ async def isholiday(date: dt):
 @app.get("/easter/{year}")
 async def easter(year: int):
     try:
-        return {"message": f"The easter day of {year} is {dinamic_holidays.calc_easter_day.easterCalc(year)}"}
+        return {"Easter day": calc_easter_day.easter_calc(year)}
     except ValueError:
         return {"message": f"The year {year} is not valid"}
 
 
-@app.get("/fixedholidays/{year}")
-async def fixedholidays(year: int):
+@app.get("/fixed_holidays/{year}")
+async def get_fixed_holidays(year: int):
     try:
-        return fixed_holidays.fixed_holidays_by_year(year)
+        return fixed_holidays.fixed_holidays(year)
     except ValueError:
         return {"message": f"The year {year} is not valid"}
 
 
-@app.get("/dinamicholidays/{year}")
-async def dinamicholidays(year: int):
+@app.get("/dynamic_holidays/{year}")
+async def get_dynamic_holidays(year: int):
     try:
-        return dinamic_holidays.dinamic_holidays_by_year(year)
+        return dynamic_holidays.dynamic_holidays(year)
     except ValueError:
         return {"message": f"The year {year} is not valid"}
 
 
-@app.get("/easterdays/{year}")
-async def easterdays(year: int):
+@app.get("/easter_days/{year}")
+async def get_easter_days(year: int):
     try:
         return calc_easter_day.easter_days(year)
     except ValueError:
@@ -56,13 +52,13 @@ async def easterdays(year: int):
 
 
 @app.get("/holidays/{year}")
-async def holidays(year: int):
+async def get_holidays(year: int):
     try:
         year_holidays = {}
-        for x, y in fixed_holidays.fixed_holidays_by_year(year).items():
+        for x, y in fixed_holidays.fixed_holidays(year).items():
             year_holidays[x] = y
 
-        for x, y in dinamic_holidays.dinamic_holidays_by_year(year).items():
+        for x, y in dynamic_holidays.dynamic_holidays(year).items():
             year_holidays[x] = y
 
         for x, y in calc_easter_day.easter_days(year).items():
